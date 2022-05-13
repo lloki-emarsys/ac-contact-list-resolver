@@ -1,0 +1,22 @@
+{
+  "customer_id": 214435179,
+  "ac_program_id": 100012510,
+  "node_id": 1981563654,
+  "event_time": "2022-05-13T08:29:40.189104+00:00",
+  "program_entry_time": null,
+  "testing_mode": false,
+  "execution_id": "100012483_833372981_0f94788ef828e467d89ba69af975c264_4588a93ea8f190ccc5f614c39cd53889",
+  "execution_phase": "end",
+  "participants": [
+    {
+      "contact_list_id": 430665360,
+      "count": 71,
+      "contact_id": null,
+      "trigger_id": "0f94788ef828e467d89ba69af975c264",
+      "execution_result": "passed",
+      "route_id": 0,
+      "deduplication_id": "100012483_833372981_0f94788ef828e467d89ba69af975c264_4588a93ea8f190ccc5f614c39cd53889_end_passed",
+      "continued_in_program": true
+    }
+  ]
+}
