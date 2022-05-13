@@ -1,21 +1,27 @@
-import { Context } from '@google-cloud/functions-framework'
+import {Context} from '@google-cloud/functions-framework'
 import {PubSub} from "@google-cloud/pubsub";
 import {ChunkMesssageType} from "./types";
 // @ts-ignore
 import suite from 'escher-suiteapi-js'
+import {env} from "./env";
 
-const topic = (new PubSub()).topic('ac-reporting-contact-list-contacts')
+
+const suiteApiHost = env('SUITE_API_HOST');
+const escherCredentialScope = env('SUITE_ESCHER_CREDENTIAL_SCOPE')
+const escherSecret = env('SUITE_ESCHER_SECRET')
+
+const topic = (new PubSub()).topic(env('CONTACT_PUBSUB_TOPIC_NAME'))
 
 export const chunk = async (message: { data?: string }, context: Context): Promise<void> => {
     const messageData = JSON.parse(message.data ?? '{}') as ChunkMesssageType
-    const options = new suite.Options('api-proxy.s.emarsys.com', {
+    const options = new suite.Options(suiteApiHost, {
         port: 443,
         rejectUnauthorized: true,
         secure: true,
-        credentialScope: process.env['SUITE_ESCHER_CREDENTIAL_SCOPE'] ?? '',
+        credentialScope: escherCredentialScope,
         timeout: 15000
     });
-    const request = suite.create('ac-contact-list_suite_v2', process.env['SUITE_ESCHER_SECRET'] ?? '', options)
+    const request = suite.create('ac-contact-list_suite_v2', escherCredentialScope, options)
     const apiResult = await request.get(`/api/v2/internal/${messageData.customerId}/contactlist/${messageData.contactListId}`, {
         offset: messageData.pagination.from,
         limit: messageData.pagination.to - messageData.pagination.from
@@ -25,7 +31,7 @@ export const chunk = async (message: { data?: string }, context: Context): Promi
         customerId: messageData.customerId,
         contactListId: messageData.contactListId,
         contactId,
-        eventTime: '2022-05-13T08:29:40.189104+00:00'
+        eventTime: (new Date()).toISOString()
     }))
     await Promise.all(messages.map(async msg => {
         const id = await topic.publishMessage({

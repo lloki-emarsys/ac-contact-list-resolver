@@ -1,9 +1,10 @@
 import { Context } from '@google-cloud/functions-framework'
 import {PubSub} from "@google-cloud/pubsub";
 import {ChunkMesssageType} from "./types";
+import {env} from "./env";
 
-const customerIds = process.env['ENABLED_CUSTOMER_IDS']?.split(',').map(Number.parseInt) ?? []
-const chunkSize = Number.parseInt(process.env['CHUNK_SIZE'] ?? '1000')
+const customerIds = env('ENABLED_CUSTOMER_IDS', '').split(',').map(Number.parseInt)
+const chunkSize = Number.parseInt(env('CHUNK_SIZE', '1000'))
 
 interface Participant {
     contact_list_id?: any;
@@ -28,7 +29,7 @@ interface NodeExecutionMessage {
     participants: Participant[];
 }
 
-const topic = (new PubSub()).topic('ac-reporting-contact-list-chunks')
+const topic = (new PubSub()).topic(env('CHUNK_PUBSUB_TOPIC_NAME'))
 
 export const cl = async (message: { data?: string }, context: Context): Promise<void> => {
     const messageData = JSON.parse(message.data ?? '{}') as NodeExecutionMessage
@@ -51,8 +52,6 @@ export const cl = async (message: { data?: string }, context: Context): Promise<
             const id = await topic.publishMessage({
                 data: Buffer.from(JSON.stringify(msg))
             })
-            // console.log(`🔥 Message with id #${id} published`, msg)
-
         }
     }
 }
